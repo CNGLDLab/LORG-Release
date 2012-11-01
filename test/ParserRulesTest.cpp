@@ -1,14 +1,53 @@
 #include <boost/test/unit_test.hpp>
 
-#include "LexicalRule.h"
-#include "URule.h"
-#include "BRule.h"
-#include "BURuleInputParser.h"
+#include "rules/Production.h"
+#include "rules/LexicalRule.h"
+#include "rules/URule.h"
+#include "rules/BRule.h"
+#include "utils/data_parsers/BURuleInputParser.h"
 
 using namespace std;
-typedef vector<double, tbb::scalable_allocator<double> > DoubleScalableVector;
+typedef vector<double> DoubleScalableVector;
 typedef string::const_iterator iterator_type;
 typedef burule_parser<iterator_type> parser;
+
+BOOST_AUTO_TEST_SUITE(ProductionSuite)
+
+BOOST_AUTO_TEST_CASE(ProductionTest){
+    //Binary production
+    vector<int> rhs;
+    rhs.push_back(1);
+    rhs.push_back(2);
+    Production prod(0, rhs, false);
+
+    BOOST_CHECK_EQUAL(prod.get_lhs(), 0);
+    BOOST_CHECK_EQUAL(prod.get_rhs0(), 1);
+    BOOST_CHECK_EQUAL(prod.get_rhs1(), 2);
+    BOOST_CHECK_EQUAL(prod.is_lexical(), false);
+    BOOST_CHECK_EQUAL(prod.is_unary(), false);
+    BOOST_CHECK_THROW(prod.get_rhs(2), std::out_of_range);
+
+    //Unary production
+    rhs.pop_back();
+    BOOST_CHECK_EQUAL(rhs.size(), 1);
+
+    Production uprod(0, rhs, false);
+    BOOST_CHECK_EQUAL(uprod.get_lhs(), 0);
+    BOOST_CHECK_EQUAL(uprod.get_rhs0(), 1);
+    BOOST_CHECK_EQUAL(uprod.is_lexical(), false);
+    BOOST_CHECK_EQUAL(uprod.is_unary(), true);
+    BOOST_CHECK_THROW(uprod.get_rhs(1), std::out_of_range);
+
+    //Lexical production
+    Production lprod(0, rhs, true);
+    BOOST_CHECK_EQUAL(lprod.get_lhs(), 0);
+    BOOST_CHECK_EQUAL(lprod.get_rhs0(), 1);
+    BOOST_CHECK_EQUAL(lprod.is_lexical(), true);
+    BOOST_CHECK_EQUAL(lprod.is_unary(), true);
+    BOOST_CHECK_THROW(lprod.get_rhs(1), std::out_of_range);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(LexicalRulesSuite)
 

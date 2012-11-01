@@ -71,6 +71,7 @@ AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 AX_BOOST_THREAD
+AX_BOOST_UNIT_TEST_FRAMEWORK
 
 AX_TBB([], AC_MSG_ERROR([cannot find the Intel TBB library consider to give --with-tbb to link it]))
 
@@ -78,5 +79,6 @@ AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
 	src/training/Makefile
+    test/Makefile
 ])
 AC_OUTPUT

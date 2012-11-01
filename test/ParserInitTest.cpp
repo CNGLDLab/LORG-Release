@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <string>
-#include <Tokeniser.h>
-#include <EnglishSpec.h>
+#include "utils/Tokeniser.h"
+#include "utils/EnglishSpec.h"
 #include <sstream>
 
 using namespace std;
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(STRetrievalTest) {
     BOOST_CHECK_THROW(SymbolTable::instance_word().get_label_string(1), Miss);
 
     SymbolTable::instance_word().insert(str);
-    BOOST_CHECK_EQUAL(SymbolTable::instance_word().get_label_id(str), 1);
+    BOOST_CHECK_EQUAL(SymbolTable::instance_word().get_label_id(str), 1u);
     BOOST_CHECK_EQUAL(SymbolTable::instance_word().get_label_string(1), str);
 }
 
@@ -78,8 +78,17 @@ BOOST_AUTO_TEST_CASE(BracketingOverlapTest){
     bracketing b1(0, true, 3, true);
     bracketing b2(1, true, 2, true);
 
-    BOOST_CHECK_EQUAL(b2.overlap(b1), true);
-	BOOST_CHECK_EQUAL(b1.overlap(b2), true);
+    BOOST_CHECK_EQUAL(b2.overlap(b1), false);
+    BOOST_CHECK_EQUAL(b1.overlap(b2), false);
+
+    //([1;4] \inter [0;3]  \neq \emptyset)
+    //  and [1;4] \not\subset [0;3]
+    //      and [0;3] \not\subset [1;4]
+    bracketing b3(1, false, 4, false);
+    bracketing b4(0, false, 3, false);
+
+    BOOST_CHECK_EQUAL(b3.overlap(b4), false);
+    BOOST_CHECK_EQUAL(b4.overlap(b3), false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

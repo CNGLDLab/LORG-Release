@@ -1,4 +1,4 @@
-SUBDIRS = src src/training
+SUBDIRS = src src/training test
 
 AM_CXXFLAGS=
 
