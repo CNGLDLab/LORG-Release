@@ -1,0 +1,18 @@
+--------------------
+Version 1.0
+--------------------
+Date: November 1st 2012
+
+Bug fixes: 
+- empty sentence
+- squared brackets in tree leaves
+- Tree iterator size()
+- Better exceptions handling for command line errors
+- Better exceptions handling when accessing vector items
+
+New features:
+- Multi-threading chart in parsing
+- Use Intel Threading Building Blocks (TBB) for multithreading
+- Enhancement of the training speed
+- UTF-8 support for French
+- Some unit test cases

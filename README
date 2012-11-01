@@ -1,0 +1,329 @@
+   LORG README
+                             ===========
+
+Author: Joseph Le Roux <joseph.le.roux@gmail.com>
+Co-author: Corentin Ribeyre <corentin.ribeyre@gmail.com>
+Date: 2011-12-09 12:34:42 CET
+
+
+Table of Contents
+=================
+1 Introduction
+2 Installation
+    2.1 Dependencies
+    2.2 Compilation
+3 Software
+    3.1 Generating Grammars From Treebanks: tb2gram
+    3.2 twostage_lorgparser
+    3.3 simple_lorgparser
+        3.3.1 How to get a grammar  for the simple lorg parser
+    3.4 Helper scripts
+        3.4.1 format_output.sh
+4 A note for people without root access and/ or non standard boost installation
+5 Format
+    5.1 Treebanks
+    5.2 Sentence files
+    5.3 Grammars
+        5.3.1 Rules
+6 Misc.
+
+
+1 Introduction
+---------------
+     This is the README for lorg tools written at [http://www.nclt.dcu.ie]
+     Questions, bug reports, feedback on the software can be logged via github https://github.com/CNGLdlab/LORG-Release 
+     We'll do our best to get back to you but we won't make any promises.
+
+     lorg_tools consist of 3 programs:
+     simple_lorgparser: a simple PCFG parser implementing the CKY algorithm.
+     twostage_lorgparser: a PCFG-LA parser implementing the CKY algorithm and a coarse-to-fine strategy.
+     tb2gram: a trainer for PCFG-LAs
+
+     This software is free to use in non-commercial projects. 
+
+     If you use these tools in support of an academic publication,
+     please cite the paper [1].
+
+
+2 Installation
+---------------
+
+2.1 Dependencies
+=================
+      1. You need boost -- >= 1.46 -- available at [boost page] or from your favorite package manager.
+      2. You may use [Google malloc] instead of your system implementation. It might speed up memory
+         allocation. Autotools will automatically try to detect the availability of this library and use it,
+         provided it is usable.
+      3. Intel Threading Building Blocks available at [tbb page] or from your favorite package manager.
+
+
+         [boost page]: http://www.boost.org
+         [tbb page]: http://threadingbuildingblocks.org
+         [Google malloc]: http://code.google.com/p/google-perftools/
+
+2.2 Compilation
+================
+      Uncompress the archive lorg_tools-SVN.tar.gz, go into the created directory and type :
+
+      ./configure && make && make install
+
+      NB: You may need administrator privileges to install lorg tools system-wide
+
+3 Software
+-----------
+
+3.1 Generating Grammars From Treebanks: tb2gram
+================================================
+
+      This program reads a treebank (in PTB format) and create a PCFG-LA,
+      in a text format readable by the two-stage parser (cf. infra).
+      It implements split-merge EM learning algorithm for PCFG_LAs. See
+      [2] for more details on the algorithm.
+
+      1. For the impatient :
+
+         tb2gram treebankfile_1 ... treebankfile_n -o output_prefix
+
+      2. More information : tb2gram -h
+
+         Various parameters can be changed and will give very different results.
+         In particular:
+         random-seed: change the random seed for EM initialisation. It will help getting
+                          different grammars with the same parameters (useful if you want to
+                          test the relevance of your new parameters, for example a new tag set).
+         unknown-word-mapping: how rare words are classified during training to handle
+                                   unknown words at parsing. See [1] for details.
+                                   This parameter can be set to:
+           + generic : is the simplest, and will work for all languages
+           + BerkeleyEnglish : use the signatures from the Berkeley
+             Parser (English)
+           + BaselineFrench : use the signatures from the Berkeley
+             Parser (French)
+           + EnglishIG : use the signatures collected on PTB ranked by
+             information gain (English). See [1] for more information.
+           + FrenchIG :use the signatures collected on FTB ranked by
+             information gain (French)
+           + Arabic : use morphotactic signatures (Arabic)
+           + ArabicIG : use morphotactics and information gain
+             (Arabic)
+           + ItalianIG : signatures collected from Italian corpora (experimental)
+
+         unknown-word-cutoff: cut-off for classifying rare words. Default is 5. Again see [1] for details
+         nbthreads: Number of threads. Default is 1.
+         remove-functions: Remove grammatical functions from node names in the treebank before learning the
+                               grammar. Default is 1 (set).
+         hm and vm: set the horizontal (hm) an vertical (vm) markovization for rule extraction. Defaults
+                        are 1 for vm (node names are not modified) and 0 for hm (1 intermediate symbol by original symbol)
+
+      3. Examples
+
+         a. Generating a grammar for English
+
+            tb2gram $WSJ/0[2-9] $WSJ/1* $WSJ/2[01] -v --nbthreads 8 -w EnglishIG -u 1 -o english_grammar
+
+            This will recursively read sections 02-21 for training
+         data, be verbose, use (by default) 6 split/merge/smooth
+         steps, 8 threads, the automatically acquired signatures for
+         English, replace tokens occurring once in the training data
+         with their signatures. Please note that it will also use the
+         default markovization settings.
+
+
+
+3.2 twostage_lorgparser
+========================
+
+      This program takes as input a grammar and text and outputs parse
+      trees for this text. It implements a coarse-to-fine CKY PCFG-LA parser.
+
+      1. for the impatient :
+
+         twostage_lorgparser input -g grammar_file -o output
+
+         where the grammar file was created by the trainer, and input is a file of sentences (one per line).
+
+         If input is not set, the parser will read from standard input and, accordingly, if output
+         is not set the parser will write on standard output.
+
+      2. more information :
+
+         twostage_lorgparser -h
+
+      3. You should use the same signatures (option --unknown-word-mapping)
+         as in training.
+
+      4. These are the parameters that you may want to change:
+         unknown-word-mapping: should have the same value for training and parsing.
+         beam-threshold: the probability threshold used for chart construction.
+         stubbornness: number of parse attempts with increasing lower beam-thresholds.
+                           The last attempt is performed without beam (potentially leading
+                            to huge forests). A negative value disables this feature.
+         accurate: a finer set of thresholds for the coarse-to-fine solution extraction (experimental)
+         parser-type: the algorithm used for solution extraction
+           vit:  Viterbi
+           kmax: k-best MaxRule output a list of solutions of length k. Use the --k to
+                     set the length of the list and --verbose to display solution scores.
+           max:  MaxRule. This is equivalent to kmax with k set to 1 but note that
+                     it is a lot more efficient. This is the default setting.
+           maxn: MaxRule with several grammars. If you use this parsing method,
+                     the command line would be something like:
+
+                     twostage_lorgparser input -g grammar_file -o output -F othergram_1 ... -F othergram_n
+         input-type: input format (see section on [sentence files] )
+
+      5. Example
+
+         twostage_lorgparser wsj23.tagged -g english_grammar_smoothed6 -o wsj3.parsed -w EnglishIG --input-type tag --parser-type kmax --k 20
+
+         This will parse the file wsj23.tagged, assuming that it is in
+         the "tag" format (see below), using the grammar
+         english_grammar_smoothed6, the maxrule algorithm, returning
+         the 20 best parses for each sentence.
+
+         [sentence files]: sec-5-2
+
+3.3 simple_lorgparser
+======================
+      The simple lorg_parser implements CKY PCFG parser. How to use:
+
+      simple_lorgparser input -g grammar_file -o output
+
+
+3.3.1 How to get a grammar  for the simple lorg parser
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+       The easiest way is to convert a PCFG-LA created with tb2gram
+       using the script annot2simple.pl:
+
+       annot2simple annotated_grammar > simple_grammar
+
+       This will create a PCFG from a PCFG-LA.
+
+       (deprecated)
+
+
+
+3.4 Helper scripts
+===================
+
+3.4.1 format_output.sh
+~~~~~~~~~~~~~~~~~~~~~~~
+       This script will remove extra comment lines from the parser's
+       output to conform to evalb format.
+
+4 A note for people without root access and/ or non standard boost installation
+--------------------------------------------------------------------------------
+
+     If your version of boost is not installed system-wide or more
+     generally if it is installed in a non-standard directory ~dir~,
+     be sure to add ~dir~ in your ~LD_LIBRARY_PATH~. For
+     example, add in your .bashrc:\\ ~export
+     LD_LIBRARY_PATH=dir:$LD_LIBRARY_PATH~
+
+
+     If you add signatures for a new language, and you feel like new
+     versions of lorg tools should have these signatures, please
+     contact us via github [ENTER ADDRESS HERE]
+
+5 Format
+---------
+     We present the formats for the different types of files used by our software
+
+5.1 Treebanks
+==============
+      Treebanks should be in PTB format. Trees can be on several
+      lines. Encoding must be UTF-8 especially for French unknown mapping.
+
+5.2 Sentence files
+===================
+      These files must contain one sentence by line. There are 3 different types of
+      input :
+      raw: The parser does its own tokenizing. This feature is
+               only implememented for English and is highly experimental.
+      tok: The input is tokenized as in the corresponding treebank.
+      tag: The input is tokenized and each token has a list of
+               predicted pos tags. Input looks like:
+
+                tok_1 ( TAG_11 ... TAG_1n) ... tok_m ( TAG_m1 ... TAG_mp )
+
+               Caution: Spaces before and after parentheses are mandatory.
+
+        For the last 2 types of input, strings "[", "[[" , "]" and
+        "]]" have a special meaning.  There are treated like chunk
+        delimiters with the following semantics. "[" or "[" mark the beginning of a chunk, while "]" or "]" mark the end of a
+        chunk. Double symbols indicate strong frontiers while simple
+        ones refer to weak frontiers.
+
+     IMPORTANT:
+     --> You should escape the input parentheses if they have no special meaning
+     --> You should escape the squared parentheses in the input and in the training set, if not
+
+     lat: The input is a lattice (or a dag, or an acyclic automaton).
+              Each line is an edge of the form:
+
+              begin_postion end_position word [ optional list of postags ]
+
+
+        Sentences are separated by an empty line. This returns the
+        best tree over the lattice, so it chooses one path. This might be
+        useful to parse the output of a speech recognition system but
+        can also be used for other purposes (for example, see [3])
+        This is still an experimental feature.
+
+
+5.3 Grammars
+=============
+      We have chosen text format over binary format, so grammars can
+      be more easily amended using scripts. On the other hand, this
+      makes our grammars quite large on disk.  An annotated grammar is
+      made of annotation information followed by annotation histories,
+      followed by grammar rules, followed by lexical rules.
+
+        Grammar ::= AnnotationInfo+ AnnotationHistory+ InternalRule+ LexicalRule+
+        AnnotationInfo ::= NT integer
+        AnnotationHistory ::= Tree[integer]
+
+      - An AnnotationInfo gives the number of annotations for a
+        non-terminal symbol in the grammar.
+      - An AnnotationHistory gives the history of splits for a
+        non-terminal symbol.
+      - In the future Annotation Histories and Annotation Information
+        will be unified.
+      - NT is a string
+
+
+5.3.1 Rules
+~~~~~~~~~~~~
+       There are 2 kinds of rules, lexical rules and internal rules,
+       the latter being divided in binary and unary internal
+       rules. See the following table for a BNF desciption of the
+       format, where annotation is of integer type and probability of
+       floating point type.
+
+         InternalRule ::= BinaryRule \/  UnaryRule
+         BinaryRule ::= "int" NT NT NT binary_probability+
+         UnaryRule ::= "int" NT NT unary_probability+
+         binary_probability ::= (annotation,annotation,annotation,probability)
+         unary_probability ::= (annotation,annotation,probability)
+         LexicalRule ::= "lex" NT word lexical_probability+
+         lexical_probability ::= (annotation,probability)
+
+
+6 References
+--------
+
+[1] "Handling Unknown Words in Statistical Latent-Variable Parsing
+  Models for Arabic, English and French", Mohammed Attia, Jennifer
+  Foster, Deirdre Hogan, Joseph Le Roux, Lamia Tounsi and Josef van
+  Genabith, Proceedings of SPMRL 2010.
+
+[2] "Improved Inference for Unlexicalized Parsing", Slav Petrov and
+Dan Klein, HLT-NAACL 2007
+
+[3] "Language-Independent Parsing with Empty Elements", Shu Cai,
+David Chiang and Yoav Goldberg, ACL-2011 (Short Paper)
+
+
+7. People
+----------
+The following people have worked on the LORG parser: Joseph Le Roux, Deirdre Hogan, Jennifer Foster, Corentin Ribeyre, Lamia Tounsi and Wolfgang Seeker.
