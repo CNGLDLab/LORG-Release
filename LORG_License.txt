@@ -20,7 +20,7 @@ The terms and conditions in this CNGL-RL not only apply to the source code made 
 (2) GRANT OF RIGHTS.
 Subject to the terms and conditions hereunder, Licensor hereby grants to Licensee a worldwide, non-transferable, non-exclusive licence to:
 install, use and reproduce the Software for academic, research, experimental and personal use, but specifically excluding Commercial Use
-use and modify the Software to create Derivative Products, subject to Section 3.2;
+use and modify the Software to create Derivative Products;
 use the Documentation, if any, solely in connection with Licensee’s authorised use of the Software;
 make one copy of the Software for backup purposes or archival purposes only. You must reproduce on such copy Dublin City University’s copyright notice and any other proprietary legends that were on the original copy of the Software.
 This CNGL-RL confers no rights upon Licensee except to those expressly granted herein.
