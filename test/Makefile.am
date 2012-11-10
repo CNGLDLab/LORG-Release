@@ -1,6 +1,6 @@
 
 if WANT_LTR
-LIBS+= -lrt 
+LIBS+= -lrt
 endif
 
 check_PROGRAMS              = twostage_lorgparser_test
@@ -31,7 +31,6 @@ common_sources = ../src/Bracketing.h \
     ../src/grammars/GrammarAnnotated.h \
     ../src/lexicon/ArabicIGMapping.h \
     ../src/lexicon/ArabicUMapping.h \
-    ../src/lexicon/ArabicUNVMapping.h \
     ../src/lexicon/BaselineFrenchUMapping.h \
     ../src/lexicon/BasicLexicon.h \
     ../src/lexicon/BerkeleyEnglishUMapping.h \
@@ -108,7 +107,6 @@ common_sources = ../src/Bracketing.h \
     ../src/grammars/Grammar.cpp \
     ../src/lexicon/ArabicIGMapping.cpp \
     ../src/lexicon/ArabicUMapping.cpp \
-    ../src/lexicon/ArabicUNVMapping.cpp \
     ../src/lexicon/BaselineFrenchUMapping.cpp \
     ../src/lexicon/BasicLexicon.cpp \
     ../src/lexicon/BerkeleyEnglishUMapping.cpp \
@@ -131,7 +129,6 @@ common_sources = ../src/Bracketing.h \
     ../src/rules/URuleTraining.cpp \
     ../src/utils/ConfigTable.cpp \
     ../src/utils/data_parsers/AnnotHistoriesParser.cpp \
-    ../src/utils/data_parsers/BURuleInputParser.cpp \
     ../src/utils/data_parsers/PTBInputParser.cpp \
     ../src/utils/data_parsers/RuleInputParser.cpp \
     ../src/utils/PtbPsTree.cpp \
@@ -140,6 +137,9 @@ common_sources = ../src/Bracketing.h \
     ../src/utils/Tagger.cpp \
     ../src/utils/Tokeniser.cpp \
     ../src/Word.cpp
+
+#    ../src/lexicon/ArabicUNVMapping.h ../src/lexicon/ArabicUNVMapping.cpp
+#    ../src/utils/data_parsers/BURuleInputParser.cpp
 
 twostage_lorgparser_test_SOURCES = $(common_sources)
 twostage_lorgparser_test_SOURCES += ParserEdgeTest.cpp \
