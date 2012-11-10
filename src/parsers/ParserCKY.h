@@ -58,7 +58,7 @@ public:
 
 protected:
   bool
-  rules_for_unary_exist(int rhs_id) const {return !unary_rhs_2_rules[rhs_id].empty();}
+  rules_for_unary_exist(int rhs_id) const {return !unary_rhs_2_rules_notop[rhs_id].empty() && !unary_rhs_2_rules_toponly[rhs_id].empty();}
 
   void remove_lex_rule(Lex* l);
 
@@ -66,8 +66,8 @@ protected:
   Grammar<Bin,Un,Lex> * grammar; ///< the grammar
 
   vector_brules * brules; //// the structure used to access binary rules
-  std::vector< std::vector<const Un*> >  unary_rhs_2_rules; // fast access unary rules from rhs
-
+  std::vector< std::vector<const Un*> >  unary_rhs_2_rules_toponly; // fast access unary rules from rhs
+  std::vector< std::vector<const Un*> >  unary_rhs_2_rules_notop; // fast access unary rules from rhs
 
   std::vector<short> unary_rhs_from_binary; /// lhs of binary rules which are also rhs of unary rules
   std::vector<short> unary_rhs_from_pos;  /// pos tags which are also rhs of unary rules
@@ -99,7 +99,8 @@ private:
 template <typename MyGrammar>
 ParserCKY<MyGrammar>::ParserCKY(MyGrammar* g) :
   grammar(g),
-  brules(NULL), unary_rhs_2_rules(),
+  brules(NULL),
+  unary_rhs_2_rules_toponly(), unary_rhs_2_rules_notop(),
   unary_rhs_from_binary(), unary_rhs_from_pos(),
   n_nonterminals(0)
 {
@@ -180,12 +181,20 @@ void ParserCKY<MyGrammar>::add_unary_rule(const Un& r,
 					  const std::vector<short>& blhs,
 					  const std::vector<short>& llhs)
 {
+  static short start_symbol = SymbolTable::instance_nt().get(LorgConstants::tree_root_name);
+
   short rhs_id = short(r.get_rhs0());
 
-  if(rhs_id >= (int) unary_rhs_2_rules.size())
-    unary_rhs_2_rules.resize(rhs_id+1);
+  if(rhs_id >= (int) unary_rhs_2_rules_toponly.size())
+    {
+      unary_rhs_2_rules_toponly.resize(rhs_id+1);
+      unary_rhs_2_rules_notop.resize(rhs_id+1);
+    }
 
-  unary_rhs_2_rules[rhs_id].push_back(&r);
+  if (r.get_lhs() == start_symbol)
+    unary_rhs_2_rules_toponly[rhs_id].push_back(&r);
+  else
+    unary_rhs_2_rules_notop[rhs_id].push_back(&r);
 
   if(exists(blhs,rhs_id) &&(!exists(unary_rhs_from_binary,rhs_id)))
     unary_rhs_from_binary.push_back(rhs_id);
