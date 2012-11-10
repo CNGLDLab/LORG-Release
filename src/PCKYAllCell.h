@@ -1001,13 +1001,20 @@ template<class MyEdge>
 void PCKYAllCell<MyEdge>::clear()
 {
   closed = false;
-  for(unsigned i = 0; i < max_size; ++i)
+
+  if(!real_cell)
     {
-      if(real_cell[i]) {
-        delete real_cell[i];
-        real_cell[i] = 0;
-      }
+      real_cell =  new CellEdge * [max_size];
+      memset(real_cell, 0, max_size * sizeof(CellEdge*));
     }
+  else
+    for(unsigned i = 0; i < max_size; ++i)
+      {
+        if(real_cell[i]) {
+          delete real_cell[i];
+          real_cell[i] = 0;
+        }
+      }
 }
 
 
