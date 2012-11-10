@@ -44,7 +44,7 @@ public:
       ("hm", po::value<int>()->default_value(0),
        "set the horizontal markovisation for binarization. negative value is infinite.")
       ("sentence-max-length",po::value<unsigned int>()->default_value(0),"maximum length for sentences to be added to the treebank (0 means no maximum)")
-      ("modified-treebank",po::value<std::string>()->default_value(""), "a filename to store the modified version of the treebank (signatures, functions,...)")      
+      ("modified-treebank",po::value<std::string>()->default_value(""), "a filename to store the modified version of the treebank (signatures, functions,...)")
       ;
     options.add(tb_opts);
   }
@@ -148,7 +148,7 @@ public:
       ("parser-type,p",po::value<std::string>()->default_value("max"),"sets the type of parsing - vit for Viterbi , max for MaxRule, maxn for MaxRule with several grammars, kmax for k-best maxrule")
       ("beam-threshold,b",po::value<double>()->default_value(0.0001), "sets the ratio for beaming")
       ("accurate", "set thresholds for accurate parsing")
-      ("min-length-beam",po::value<unsigned>()->default_value(7), "minimum length of sentences to use beam")
+      ("min-length-beam",po::value<unsigned>()->default_value(1), "minimum length of sentences to use beam")
       ("kbest,k",po::value<unsigned>()->default_value(1), "numbers of parses to return for each sentence (only used in kmax)")
       ("stubbornness,s", po::value<int>()->default_value(-1), "number of retries (with lower beam-threshold) if packed forest construction fails. Last try is performed without threshold. Set to negative value to skip this.")
       ("nbthreads", po::value<unsigned>()->default_value(2), "Number of threads for processing the chart")
