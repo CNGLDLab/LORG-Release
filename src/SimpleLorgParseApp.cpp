@@ -72,7 +72,7 @@ int SimpleLorgParseApp::run()
       best_tree = chart.get_best_tree(start_symbol, 0, always_output_forms, false);
     }
 
-    *out << parse_solution(test_sentence,
+    *out << unix_parse_solution(test_sentence,
 			   ++count,
 			   s.size(),
 			   best_tree, LorgConstants::NullProba, //FIXME get real prob
