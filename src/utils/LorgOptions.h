@@ -122,6 +122,7 @@ public:
       ("always-output-forms", po::value<bool>()->default_value(true), "always output the original form of words. If false output signatures of unknowns instead")
       ("output-annotations", po::value<bool>()->default_value(false), "output trees with nodes decorated by annotations")
       ("extract-features,e", po::value<bool>()->default_value(false), "output features from trees (experimental)")
+      ("output-format,O", po::value<std::string>()->default_value("unix"), "output format : unix [default] or json")
     ;
     options.add(parser_opts);
   }

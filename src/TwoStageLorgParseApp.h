@@ -9,6 +9,15 @@
 
 #include "feature_extract/Extract.h"
 
+#include "utils/PtbPsTree.h"
+#include "ParseSolution.h"
+#include "utils/LorgConstants.h"
+
+#include "parsers/ParserCKYAllFactory.h"
+
+#include <tbb/tick_count.h>
+using namespace tbb;
+
 
 class TwoStageLorgParseApp : public LorgParseApp
 {
@@ -27,18 +36,15 @@ private:
     unsigned kbest;
 
     bool extract_features;
+  parse_solution::parse_solution_format output_format;
 };
 
-#include "utils/PtbPsTree.h"
-#include "ParseSolution.h"
-#include "utils/LorgConstants.h"
 
-#include "parsers/ParserCKYAllFactory.h"
-
-#include <tbb/tick_count.h>
-using namespace tbb;
-
-TwoStageLorgParseApp::TwoStageLorgParseApp() : LorgParseApp(), parser(NULL) {}
+TwoStageLorgParseApp::TwoStageLorgParseApp() : LorgParseApp(), parser(NULL)
+{
+  unix_parse_solution::init();
+  json_parse_solution::init();
+}
 
 TwoStageLorgParseApp::~TwoStageLorgParseApp()
 {
@@ -96,14 +102,19 @@ int TwoStageLorgParseApp::run()
             if(parser->is_chart_valid(start_symbol))
                 parser->get_parses(start_symbol, kbest, always_output_forms, output_annotations, best_trees);
         }
-
-        *out << unix_parse_solution(raw_sentence, ++count, sentence.size(), best_trees,
-                               (verbose) ? (tick_count::now() - sent_start).seconds() : 0,
-                               verbose, comments, extract_features);
+        parse_solution * p_typed =
+          parse_solution::factory.create_object(output_format,
+                                                parse_solution(raw_sentence, ++count,
+                                                               sentence.size(), best_trees,
+                                                               (verbose) ? (tick_count::now() - sent_start).seconds() : 0,
+                                                               verbose, comments, extract_features)
+                                                );
+                p_typed->print(*out);
+                delete p_typed;
 
         ///*
         if(verbose && count % 50 == 0)
-            std::cout << count << " parsed sentences in " << (tick_count::now() - parse_start).seconds() << " sec" << std::endl;
+            std::clog << count << " parsed sentences in " << (tick_count::now() - parse_start).seconds() << " sec" << std::endl;
         //*/
 
         //sanity
@@ -152,6 +163,7 @@ bool TwoStageLorgParseApp::read_config(ConfigTable& configuration)
 
     extract_features = configuration.get_value<bool>("extract-features");
 
+    output_format = parse_solution::format_from_string(configuration.get_value<std::string>("output-format"));
 
     return true;
 }

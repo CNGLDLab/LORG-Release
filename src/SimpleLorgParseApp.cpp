@@ -72,13 +72,17 @@ int SimpleLorgParseApp::run()
       best_tree = chart.get_best_tree(start_symbol, 0, always_output_forms, false);
     }
 
-    *out << unix_parse_solution(test_sentence,
-			   ++count,
-			   s.size(),
-			   best_tree, LorgConstants::NullProba, //FIXME get real prob
-			   (verbose) ? (clock() - sent_start) / double(CLOCKS_PER_SEC) : 0,
-			   verbose)
-	 << '\n';
+    //FIXME get real prob
+    std::vector<std::pair<PtbPsTree*, double> > solutions(1, std::make_pair<>(best_tree, 1));
+
+    parse_solution p = parse_solution(test_sentence,
+                                      ++count,
+                                      s.size(),
+                                      solutions,
+			        (verbose) ? (clock() - sent_start) / double(CLOCKS_PER_SEC) : 0,
+               verbose, comments, false);
+
+ *out << unix_parse_solution(p)	 << '\n';
 
     delete best_tree;
     s.clear();
