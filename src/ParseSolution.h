@@ -64,7 +64,7 @@ public:
       }
     else
       {
-        return on_unknown_type_id(id);
+        return this->on_unknown_type_id(id);
       }
   };
 
@@ -99,7 +99,7 @@ struct parse_solution
   static void init_feature_extractor();
   static ParseSolutionFactory factory;
 
-
+  virtual ~parse_solution() {};
 
 
   virtual std::ostream& print(std::ostream& out) const {return out;};
