@@ -4,7 +4,7 @@
 #include "rules/LexicalRule.h"
 #include "rules/URule.h"
 #include "rules/BRule.h"
-#include "utils/data_parsers/BURuleInputParser.h"
+#include "utils/data_parsers/BURuleInputParser.cpp"
 
 using namespace std;
 typedef vector<double> DoubleScalableVector;
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(LexicalRulesSuite)
 
-BOOST_AUTO_TEST_CASE(LexicalRuleInstantiationTest){    
+BOOST_AUTO_TEST_CASE(LexicalRuleInstantiationTest){
     int rhs0 = 12;
 
     vector<lexical_proba_info> probs;
@@ -282,4 +282,3 @@ BOOST_AUTO_TEST_CASE(RuleParserBinaryTest){
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

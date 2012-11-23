@@ -1,3 +1,5 @@
+// -*- mode: c++ -*-
+
 #ifndef BRACKETING_H
 #define BRACKETING_H
 
@@ -45,8 +47,5 @@ bool bracketing::overlap(const bracketing& b2) const
 
   return res;
 }
-
-
-
 
 #endif // BRACKETING_H
